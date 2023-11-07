@@ -113,7 +113,7 @@ class Model implements ModelFilterInterface
     public function filterMultiSelect(Builder $query, string $field, array $value): void
     {
         $empty = false;
-
+        
         if (!(array_key_exists('id', $value) && $value['id'] == $field)) {
             $field       = $field . '.' . array_key_first($value);
             $value       = $value[array_key_first($value)];

@@ -98,12 +98,12 @@ trait Filter
             'is_not',
             'starts_with',
             'ends_with',
-            'is_empty',
-            'is_not_empty',
-            'is_null',
-            'is_not_null',
-            'is_blank',
-            'is_not_blank',
+            // 'is_empty',
+            // 'is_not_empty',
+            // 'is_null',
+            // 'is_not_null',
+            // 'is_blank',
+            // 'is_not_blank',
         ];
     }
 
@@ -118,7 +118,9 @@ trait Filter
                 continue;
             }
             foreach ($column->inputs as $key => $input) {
-                data_set($input, 'dataField', ($column->dataField != '') ? $column->dataField : $column->field);
+                if (!isset($input['dataField'])) {
+                    data_set($input, 'dataField', $column->dataField ?: $column->field);
+                }
                 data_set($input, 'field', $column->field);
                 data_set($input, 'label', $column->title);
                 $makeFilters[$key][]  = $input;
@@ -183,11 +185,8 @@ trait Filter
 
         $this->filters['multi_select'][$data['id']] = $data;
 
-        $filter = collect($this->makeFilters->get('multi_select'))->where('data_field', $data['id']);
-
-        $filter = $filter->first();
-
         /** @var array $filter */
+        $filter = collect($this->makeFilters->get('multi_select'))->where('dataField', $data['id'])->first();
 
         $this->enabledFilters[$data['id']]['id']            = $data['id'];
         $this->enabledFilters[$data['id']]['label']         = $filter['label'];
@@ -202,9 +201,13 @@ trait Filter
     public function filterSelect(string $field, string $label): void
     {
         $this->resetPage();
-
+        
         $this->enabledFilters[$field]['id']         = $field;
         $this->enabledFilters[$field]['label']      = $label;
+
+        // $data = [ 'select' => ['regiao_venda' => ['id_tipo_regiao' => 1]]];
+        //  dd($this->filters, $field);
+        //dd(data_get($data, "select.regiao_venda.id_tipo_regiao"));
 
         if (data_get($this->filters, "select.$field") === '') {
             $this->clearFilter($field);

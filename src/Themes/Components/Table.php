@@ -4,6 +4,10 @@ namespace PowerComponents\LivewirePowerGrid\Themes\Components;
 
 class Table
 {
+    public string $divClass = '';
+
+    public string $divStyle = '';
+
     public string $tableClass = '';
 
     public string $tableStyle = '';
@@ -15,6 +19,10 @@ class Table
     public string $trClass = '';
 
     public string $trStyle = '';
+
+    public string $trFiltersClass = '';
+
+    public string $trFiltersStyle = '';
 
     public string $thClass = '';
 
@@ -33,7 +41,7 @@ class Table
     public string $tdBodyStyle = '';
 
     public string $tdBodyClassTotalColumns;
-    
+
     public string $tdBodyStyleTotalColumns;
 
     /**
@@ -45,6 +53,14 @@ class Table
     {
         $this->tableClass = $tableClass;
         $this->tableStyle = $tableStyle;
+    }
+
+    public function div(string $attrClass, string $attrStyle = ''): Table
+    {
+        $this->divClass = $attrClass;
+        $this->divStyle = $attrStyle;
+
+        return $this;
     }
 
     public function thead(string $attrClass, string $attrStyle = ''): Table
@@ -59,6 +75,14 @@ class Table
     {
         $this->trClass = $attrClass;
         $this->trStyle = $attrStyle;
+
+        return $this;
+    }
+
+    public function trFilters(string $attrClass, string $attrStyle = ''): Table
+    {
+        $this->trFiltersClass = $attrClass;
+        $this->trFiltersStyle = $attrStyle;
 
         return $this;
     }

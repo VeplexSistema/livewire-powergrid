@@ -11,7 +11,8 @@ return [
     | Configure here the theme of your choice.
     */
 
-    'theme' => \PowerComponents\LivewirePowerGrid\Themes\Tailwind::class,
+    // 'theme' => \PowerComponents\LivewirePowerGrid\Themes\Tailwind::class,
+    'theme' => App\Classes\VeplexGrid::class,
     //'theme' => \PowerComponents\LivewirePowerGrid\Themes\Bootstrap5::class,
 
     /*
@@ -34,13 +35,12 @@ return [
         /*
          * https://flatpickr.js.org
          */
-        'flat_piker' => [
-            'js'        => 'https://cdn.jsdelivr.net/npm/flatpickr',
-            'css'       => 'https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css',
-            'translate' => (app()->getLocale() != 'en') ? 'https://npmcdn.com/flatpickr/dist/l10n/' . \Illuminate\Support\Str::substr(app()->getLocale(), 0, 2) . '.js' : '',
-            'locales'   => [
+        'flatpickr' => [
+            'js'      => 'https://cdn.jsdelivr.net/npm/flatpickr',
+            'css'     => 'https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css',
+            'locales' => [
                 'pt_BR' => [
-                    'locale'     => 'pt',
+                    'locale'     => 'pt_BR',
                     'dateFormat' => 'd/m/Y H:i',
                     'enableTime' => true,
                     'time_24hr'  => true,
@@ -61,7 +61,7 @@ return [
     |
     */
 
-    'filter' => 'inline',
+    'filter' => 'outside',
 
     /*
     |--------------------------------------------------------------------------

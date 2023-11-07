@@ -77,7 +77,7 @@ it('publishes the Demo Table', function () {
         ->expectsOutput("\n1. You must include Route::view('/powergrid', 'powergrid-demo'); in your routes/web.php file.")
         ->expectsOutput("\n2. Serve your project. For example, run php artisan serve.")
         ->expectsOutput("\n3. Visit http://localhost/powergrid to view the Demo Table.")
-        ->expectsOutput("\n\n⭐ Please consider starring our repository at https://github.com/Power-Components/livewire-powergrid ⭐\n");
+        ->expectsOutput("\n\n⭐ Thanks! Please consider starring our repository at https://github.com/Power-Components/livewire-powergrid ⭐\n");
         
     $this->assertFileExists($tableFile);
     $this->assertFileExists($viewsFile);
@@ -219,8 +219,8 @@ it('publishes views file', function () {
     File::delete($dirPath);
 });
 
-it('publishes lang file', function () {
-    $dirPath = getLaravelDir() . 'resources/lang/vendor/livewire-powergrid';
+it('publishes the language file in the lang path', function () {
+    $dirPath = lang_path('vendor/livewire-powergrid');
 
     File::delete($dirPath);
 

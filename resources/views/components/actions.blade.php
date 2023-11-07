@@ -11,6 +11,7 @@
                 style="{{ $theme->table->tdBodyStyle }}">
                 @php
                     $class            = filled($action->class) ? $action->class : $theme->actions->headerBtnClass;
+                    $class            = $attributes->class($class);
                     if($action->singleParam) {
                         $actionParameters = $helperClass->makeActionParameter($action->param, $row);
                     } else {
@@ -44,13 +45,13 @@
                         $event['params'] = $helperClass->makeActionParameters(data_get($ruleEmitTo, 'params', []), $row);
                         $action->emitTo = true;
                     } else {
-
                         if (filled($action->event)) {
                             $action->emit    = true;
                             $event['event']  = $action->event;
                             $event['params'] = $actionParameters;
 
                             if (filled($action->to)) {
+                                $action->emit    = false;
                                 $action->emitTo  = true;
                                 $event['to']     = $action->to;
                             }
@@ -74,7 +75,7 @@
 
                             @if($ruleDisabled) disabled @endif
                             title="{{ $action->tooltip }}"
-                            class="{{ $class }}"
+                            {{ $class }}
                         >
                             {!! $ruleCaption ?? $action->caption !!}
                         </button>
@@ -86,7 +87,7 @@
                            href="{{ $ruleRedirect['url'] }}" target="{{ $ruleRedirect['target'] }}"
                            @endif
                            title="{{ $action->tooltip }}"
-                           class="{{ $class }}">
+                           {{ $class }}>
                             {!! $ruleCaption ?? $action->caption !!}
                         </a>
                     @endif
@@ -100,7 +101,7 @@
                                 @csrf
                                 <button type="submit"
                                         title="{{ $action->tooltip }}"
-                                        @if($ruleDisabled) disabled @endif class="{{ $class }}">
+                                        @if($ruleDisabled) disabled @endif {{ $class }}>
                                     {!! $ruleCaption ?? $action->caption !!}
                                 </button>
                             </form>
@@ -108,7 +109,7 @@
                             <a href="{{ route($action->route, $actionParameters) }}"
                                target="{{ $action->target }}"
                                title="{{ $action->tooltip }}"
-                               class="{{ $class }}"
+                               {{ $class }}
                             >
                                 {!! $ruleCaption ?? $action->caption !!}
                             </a>

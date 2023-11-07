@@ -95,7 +95,7 @@ class FillableTable
         }
 
         $columns .= "        ]\n";
-
+        
         $stub = str_replace('{{ datasource }}', $datasource, $stub);
 
         return str_replace('{{ columns }}', $columns, $stub);

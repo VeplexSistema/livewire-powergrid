@@ -8,11 +8,11 @@ use Illuminate\Contracts\View\{Factory, View};
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasAttributes;
 use Illuminate\Pagination\{AbstractPaginator};
-use Illuminate\Support\{Collection as BaseCollection, Facades\Crypt, Str};
+use Illuminate\Support\{Collection as BaseCollection, Str};
 use Livewire\{Component, WithPagination};
 use PowerComponents\LivewirePowerGrid\Helpers\{Collection, Helpers, Model, SqlSupport};
 use PowerComponents\LivewirePowerGrid\Themes\ThemeBase;
-use PowerComponents\LivewirePowerGrid\Traits\{BatchableExport, Checkbox, Exportable, Filter, WithSorting};
+use PowerComponents\LivewirePowerGrid\Traits\{BatchableExport, Checkbox, Exportable, Filter, PersistData, WithSorting};
 use stdClass;
 
 class PowerGridComponent extends Component
@@ -24,6 +24,7 @@ class PowerGridComponent extends Component
     use HasAttributes;
     use Filter;
     use BatchableExport;
+    use PersistData;
 
     public array $headers = [];
 
@@ -49,6 +50,9 @@ class PowerGridComponent extends Component
 
     public string $currentTable = '';
 
+    public array $ordemFiltros = []; //aa
+
+
     /** @var \Illuminate\Database\Eloquent\Collection|array|Builder $datasource */
     public $datasource;
 
@@ -72,8 +76,6 @@ class PowerGridComponent extends Component
     protected string $paginationTheme = 'tailwind';
 
     protected ThemeBase $powerGridTheme;
-
-    public array $persist = [];
 
     /**
      * @return $this
@@ -99,7 +101,6 @@ class PowerGridComponent extends Component
 
     /**
      * default false
-     * @return $this
      */
     public function showToggleColumns(): PowerGridComponent
     {
@@ -116,22 +117,15 @@ class PowerGridComponent extends Component
         return $this;
     }
 
-    /**
-     * filters, columns
-     * @return $this
-     */
-    public function persist(array $tableItems): PowerGridComponent
-    {
-        $this->persist = $tableItems;
-
-        return $this;
-    }
-
     public function mount(): void
     {
+
         $this->setUp();
 
-        $this->columns = $this->columns();
+        $this->columns = $this->columns();//aa
+        foreach ($this->columns as $id => $colunas) {
+           $this->ordemFiltros[$id] = $colunas->field;
+        } //aa
 
         $this->resolveTotalRow();
 
@@ -146,12 +140,10 @@ class PowerGridComponent extends Component
      */
     public function setUp()
     {
+
         $this->showPerPage();
     }
 
-    /**
-     * @return $this
-     */
     public function showPerPage(int $perPage = 10): PowerGridComponent
     {
         if (Str::contains((string) $perPage, $this->perPageValues)) {
@@ -170,10 +162,13 @@ class PowerGridComponent extends Component
     private function resolveTotalRow(): void
     {
         collect($this->columns())->each(function (Column $column) {
-            if ($column->sum['header'] || $column->count['header'] || $column->min['header'] || $column->avg['header'] || $column->max['header']) {
+            $hasHeader = $column->sum['header'] || $column->count['header'] || $column->min['header'] || $column->avg['header'] || $column->max['header'];
+            $hasFooter = $column->sum['footer'] || $column->count['footer'] || $column->min['footer'] || $column->avg['footer'] || $column->max['footer'];
+
+            if ($hasHeader) {
                 $this->headerTotalColumn = true;
             }
-            if ($column->sum['footer'] || $column->count['footer'] || $column->min['footer'] || $column->avg['footer'] || $column->max['footer']) {
+            if ($hasFooter) {
                 $this->footerTotalColumn = true;
             }
         });
@@ -218,6 +213,11 @@ class PowerGridComponent extends Component
         return [];
     }
 
+    public function updatedSearch(): void
+    {
+        $this->gotoPage(1);
+    }
+
     /**
      * @return AbstractPaginator|BaseCollection
      * @throws Exception
@@ -228,10 +228,6 @@ class PowerGridComponent extends Component
         $datasource = (!empty($this->datasource)) ? $this->datasource : $this->datasource();
 
         $this->isCollection = is_a((object) $datasource, BaseCollection::class);
-
-        if (filled($this->search)) {
-            $this->gotoPage(1);
-        }
 
         if ($this->isCollection) {
             $filters = Collection::query($this->resolveCollection($datasource))
@@ -266,7 +262,7 @@ class PowerGridComponent extends Component
         } else {
             $sortField = $this->currentTable . '.' . $this->sortField;
         }
-
+        
         /** @var Builder $results */
         $results = $this->resolveModel($datasource)
             ->where(function (Builder $query) {
@@ -278,7 +274,7 @@ class PowerGridComponent extends Component
                     ->filterContains()
                     ->filter();
             });
-
+            
         if ($this->withSortStringNumber) {
             $sortFieldType = SqlSupport::getSortFieldType($sortField);
 
@@ -425,6 +421,8 @@ class PowerGridComponent extends Component
     }
 
     /**
+     * @deprecated
+     * @see https://github.com/Power-Components/livewire-powergrid/discussions/406
      * @param array $data
      * @return bool
      */
@@ -434,6 +432,8 @@ class PowerGridComponent extends Component
     }
 
     /**
+     * @deprecated
+     * @see https://github.com/Power-Components/livewire-powergrid/discussions/406
      * @return array|null|string
      */
     public function updateMessages(string $status, string $field = '_default_message')
@@ -476,58 +476,6 @@ class PowerGridComponent extends Component
         })->toArray();
 
         $this->persistState('columns');
-
-        $this->fillData();
-    }
-
-    private function persistState(string $tableItem):void
-    {
-        $state = [];
-        if (in_array('columns', $this->persist)) {
-            $state['columns'] = collect($this->columns)
-                ->map(fn ($column)         => (object) $column)
-                ->mapWithKeys(fn ($column) => [$column->field => $column->hidden])
-                ->toArray();
-        }
-        if (in_array('filters', $this->persist)) {
-            $state['filters']        = $this->filters;
-            $state['enabledFilters'] = $this->enabledFilters;
-        }
-
-        if (!empty($this->persist)) {
-            $url  = parse_url(strval(filter_input(INPUT_SERVER, 'HTTP_REFERER')));
-            $path = $url && array_key_exists('path', $url) ? $url['path'] : '/';
-            setcookie('pg:' . $this->tableName, strval(json_encode($state)), now()->addYear()->unix(), $path);
-        }
-    }
-
-    private function restoreState():void
-    {
-        if (empty($this->persist)) {
-            return;
-        }
-
-        $cookie = filter_input(INPUT_COOKIE, 'pg:' . $this->tableName);
-        if (is_null($cookie)) {
-            return;
-        }
-
-        $state = (array) json_decode(strval($cookie), true);
-
-        if (in_array('columns', $this->persist) && array_key_exists('columns', $state)) {
-            $this->columns = collect($this->columns)->map(function ($column) use ($state) {
-                if (!$column->forceHidden && array_key_exists($column->field, $state['columns'])) {
-                    data_set($column, 'hidden', $state['columns'][$column->field]);
-                }
-
-                return (object) $column;
-            })->toArray();
-        }
-
-        if (in_array('filters', $this->persist) && array_key_exists('filters', $state)) {
-            $this->filters        = $state['filters'];
-            $this->enabledFilters = $state['enabledFilters'];
-        }
     }
 
     /**
