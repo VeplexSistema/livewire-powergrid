@@ -5,6 +5,15 @@
     "license": "MIT",
     "minimum-stability": "dev",
     "prefer-stable": true,
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/VeplexSistema/livewire-powergrid.git",
+            "options": {
+                "branch": "2.x"
+            }
+        }
+    ],
     "authors": [
         {
             "name": "Luan Freitas",
