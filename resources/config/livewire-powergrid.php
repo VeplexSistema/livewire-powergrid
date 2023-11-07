@@ -12,7 +12,7 @@ return [
     */
 
     // 'theme' => \PowerComponents\LivewirePowerGrid\Themes\Tailwind::class,
-    'theme' => App\Classes\VeplexGrid::class,
+    'theme' => \PowerComponents\LivewirePowerGrid\Themes\VeplexGrid::class,
     //'theme' => \PowerComponents\LivewirePowerGrid\Themes\Bootstrap5::class,
 
     /*
