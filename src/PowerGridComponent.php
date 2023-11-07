@@ -124,7 +124,7 @@ class PowerGridComponent extends Component
 
         $this->columns = $this->columns();//aa
         foreach ($this->columns as $id => $colunas) {
-           $this->ordemFiltros[$id] = $colunas->field;
+           $this->ordemFiltros[$id] = $colunas->title;
         } //aa
 
         $this->resolveTotalRow();
