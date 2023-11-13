@@ -422,6 +422,9 @@ final class Column
      */
     public function makeBooleanFilter(string $dataField = '', string $trueLabel = 'Yes', string $falseLabel = 'No', array $settings = []): Column
     {
+        $this->inputs['boolean_filter']['enabled']     = true;
+        $this->inputs['boolean_filter']['true_label']  = $trueLabel;
+        $this->inputs['boolean_filter']['false_label'] = $falseLabel;
         $this->inputs['boolean_filter']['class']       = $settings['class']   ?? '';
         if (filled($dataField)) {
             $this->dataField = $dataField;
